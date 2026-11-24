@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10131c">
+<meta name="description" content="Достарға арналған жеке фотоальбом және профильдер.">
+<title>Өзімізғой — Friends</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1018;--panel:#171c28;--line:#293244;--muted:#aab4c5;--accent:#b9f36b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#20283a 0,#0d1018 55%);color:#f4f6fb;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(980px,100%);margin:auto;padding:28px 18px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.brand{font-weight:800;letter-spacing:.08em;font-size:13px;color:var(--accent)}h1{font-size:clamp(25px,5vw,42px);margin:8px 0 6px;letter-spacing:-.04em}.sub{color:var(--muted);margin:0 0 22px;font-size:14px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:8px 12px;color:var(--muted);font-size:12px}
+.photo-wrap{position:relative;border:1px solid #3a4354;border-radius:22px;overflow:hidden;background:#151a25;box-shadow:0 24px 80px #0008}
+.group-photo{display:block;width:100%;height:auto}
+.hotspot{position:absolute;transform:translate(-50%,-50%);width:clamp(34px,6vw,52px);height:clamp(34px,6vw,52px);border:2px solid #fff;background:#b9f36b;color:#111827;border-radius:50%;font-weight:900;font-size:15px;box-shadow:0 4px 18px #000a;cursor:pointer;display:grid;place-items:center;transition:transform .18s,background .18s}
+.hotspot:hover,.hotspot:focus-visible{transform:translate(-50%,-50%) scale(1.16);background:#fff;outline:3px solid #b9f36b}
+.tip{display:flex;gap:9px;align-items:center;color:var(--muted);font-size:13px;margin:14px 2px 24px}.dot{width:9px;height:9px;background:var(--accent);border-radius:50%}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:22px 0 12px}.section-head h2{font-size:19px;margin:0}.section-head span{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.person{border:1px solid var(--line);background:linear-gradient(145deg,#1a2130,#121722);border-radius:17px;padding:10px;text-align:left;color:inherit;cursor:pointer;min-width:0;transition:transform .18s,border-color .18s}
+.person:hover{transform:translateY(-3px);border-color:var(--accent)}.person img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;display:block;background:#293244}
+.person strong{display:block;margin:10px 2px 3px;font-size:15px}.person small{color:var(--muted);margin-left:2px}
+footer{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;color:#8e99ab;font-size:11px;line-height:1.6}
+.modal{position:fixed;inset:0;background:#05070bdc;display:none;place-items:center;padding:18px;z-index:10;backdrop-filter:blur(8px)}.modal.open{display:grid}
+.dialog{width:min(420px,100%);background:#171d29;border:1px solid #3a455a;border-radius:24px;padding:16px;position:relative;box-shadow:0 24px 90px #000b}
+.close{position:absolute;right:14px;top:14px;border:1px solid #4a566a;background:#101520;color:white;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
+.profile-photo{width:100%;height:290px;object-fit:cover;border-radius:17px;background:#293244}
+.profile-info{padding:15px 4px 4px}.profile-info h2{margin:0 0 6px;font-size:26px}.age{color:var(--muted);margin:0 0 15px}
+.ig{display:inline-flex;text-decoration:none;color:#111827;background:var(--accent);font-weight:800;padding:11px 16px;border-radius:12px;font-size:14px}.ig:hover{background:#d4ff9c}
+@media(max-width:520px){main{padding:20px 12px 35px}.photo-wrap{border-radius:15px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-photo{height:260px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">FRIENDS / PRIVATE ALBUM</div><div class="pill">8 профиль</div></header>
+<h1>Өзімізге арналған орта</h1>
+<p class="sub">Ортақ суреттен досыңды таңда — профилін аш.</p>
+<section class="photo-wrap" aria-label="Достардың ортақ суреті">
+<img class="group-photo" src="assets/friends-group.png" alt="Достардың топтық суреті">
+<div id="hotspots"></div>
+</section>
+<div class="tip"><span class="dot"></span> Суреттегі нөмірді немесе төмендегі профильді бас.</div>
+<div class="section-head"><h2>Достар</h2><span>Аты · жасы · Instagram</span></div>
+<section class="cards" id="cards"></section>
+<footer>Бұл жеке достар альбомы. Сайтты жарияламас бұрын фотодағы адамдардың келісімін ал. Instagram сілтемелері сыртқы парақшаға апарады.</footer>
+</main>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="personName">
+<div class="dialog">
+<button class="close" id="close" aria-label="Жабу">×</button>
+<img class="profile-photo" id="profilePhoto" alt="Профиль суреті">
+<div class="profile-info"><h2 id="personName"></h2><p class="age" id="personAge"></p><a class="ig" id="instagram" target="_blank" rel="noopener noreferrer">Instagram парақшасын ашу ↗</a></div>
+</div>
+</div>
+<script>
+const people = [{"id": 1, "name": "Азамат", "age": 22, "instagram": "aza_nurmuxanbetov"}, {"id": 2, "name": "Даниел", "age": 22, "instagram": "danch1kx"}, {"id": 3, "name": "Бейбіт", "age": 22, "instagram": "amira1liev"}, {"id": 4, "name": "Абдулазиз", "age": 22, "instagram": "bax1tov1ch"}, {"id": 5, "name": "Ербол", "age": 22, "instagram": "isma1lov_1012"}, {"id": 6, "name": "Дидар", "age": 22, "instagram": "_d_qwerty_"}, {"id": 7, "name": "Сайд", "age": 21, "instagram": "_said._001_"}, {"id": 9, "name": "Азеке", "age": 22, "instagram": "_.azekee._"}];
+const positions = {
+  1:{x:32.8,y:54.5}, 2:{x:49.7,y:53.4}, 3:{x:73.7,y:53.0},
+  4:{x:55.3,y:61.2}, 5:{x:17.5,y:63.1}, 6:{x:30.1,y:64.5},
+  7:{x:39.0,y:65.3}, 9:{x:82.5,y:60.2}
+};
+const cards=document.getElementById('cards'),hotspots=document.getElementById('hotspots');
+function openProfile(p){
+ document.getElementById('profilePhoto').src=`assets/face-${p.id}.jpg`;
+ document.getElementById('profilePhoto').alt=p.name;
+ document.getElementById('personName').textContent=p.name;
+ document.getElementById('personAge').textContent=`${p.age} жаста`;
+ const link=document.getElementById('instagram');
+ link.href=`https://www.instagram.com/${encodeURIComponent(p.instagram)}/`;
+ link.setAttribute('aria-label',`${p.name} Instagram парақшасы`);
+ document.getElementById('modal').classList.add('open');
+}
+people.forEach(p=>{
+ const pos=positions[p.id],b=document.createElement('button');
+ b.className='hotspot';b.textContent=p.id;b.style.left=pos.x+'%';b.style.top=pos.y+'%';
+ b.setAttribute('aria-label',`${p.name} профилін ашу`);b.addEventListener('click',()=>openProfile(p));hotspots.appendChild(b);
+ const card=document.createElement('button');card.className='person';
+ card.innerHTML=`<img src="assets/face-${p.id}.jpg" alt=""><strong></strong><small>${p.age} жас</small>`;
+ card.querySelector('strong').textContent=p.name;card.addEventListener('click',()=>openProfile(p));cards.appendChild(card);
+});
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('close').addEventListener('click',closeModal);
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body></html>
